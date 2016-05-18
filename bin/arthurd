@@ -97,6 +97,7 @@ def main():
         logging.info("King Arthur running in daemon mode.")
         cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
 
+    cherrypy.config.update({'server.socket_host': '0.0.0.0'})
     cherrypy.quickstart(app)
 
 
