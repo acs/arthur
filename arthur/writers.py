@@ -46,6 +46,22 @@ NOT_ANALIZE_STRINGS_MAPPING = {
     }]
 }
 
+NOT_ANALIZE_STRINGS_MAPPING_STR = """
+{
+  "dynamic_templates": [
+    { "notanalyzed": {
+          "match": "*",
+          "match_mapping_type": "string",
+          "mapping": {
+              "type":        "string",
+              "index":       "not_analyzed"
+          }
+       }
+    }
+  ]
+} """
+
+
 DISABLE_DYNAMIC_MAPPING = {
     'dynamic' : True,
     'properties' : {
@@ -55,6 +71,18 @@ DISABLE_DYNAMIC_MAPPING = {
         }
     }
 }
+
+DISABLE_DYNAMIC_MAPPING_STR = """ {
+    "dynamic":true,
+    "properties": {
+        "data": {
+            "dynamic":false,
+            "properties": {
+            }
+        }
+    }
+} """
+
 
 
 class ElasticSearchError(BaseError):
@@ -69,8 +97,8 @@ class ElasticItemsWriter:
         was_created = self.create_index(self.idx_url, clean=clean)
 
         if was_created:
-            self.create_mapping(idx_url, NOT_ANALIZE_STRINGS_MAPPING)
-            self.create_mapping(idx_url, DISABLE_DYNAMIC_MAPPING)
+            self.create_mapping(idx_url, NOT_ANALIZE_STRINGS_MAPPING_STR)
+            self.create_mapping(idx_url, DISABLE_DYNAMIC_MAPPING_STR)
 
     def write(self, items, max_items=100):
         url = self.idx_url + '/items/_bulk'
@@ -150,7 +178,7 @@ class ElasticItemsWriter:
         """Create a mapping"""
 
         mapping_url = idx_url + '/items/_mapping'
-        mapping = json.dumps(mapping)
+        # mapping = json.dumps(mapping)
 
         try:
             r = requests.put(mapping_url, data=mapping)
