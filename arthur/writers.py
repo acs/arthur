@@ -134,6 +134,11 @@ class ElasticItemsWriter:
             logger.debug("Writting %i items to %s (%i packs of %i items max)",
                          nitems, url, len(packages), max_items)
 
+            # If the index was deleted recreate it to avoid loosing the mapping
+            if self.create_index(self.idx_url):
+                self.create_mapping(self.idx_url, NOT_ANALIZE_STRINGS_MAPPING_STR)
+                self.create_mapping(self.idx_url, DISABLE_DYNAMIC_MAPPING_STR)
+
         for bulk, nitems in packages:
             task_init = time.time()
 
