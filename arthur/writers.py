@@ -27,6 +27,7 @@ import time
 
 import requests
 
+from datetime import datetime
 from .errors import BaseError
 
 
@@ -114,6 +115,9 @@ class ElasticItemsWriter:
                 nitems += bulk_size
                 bulk = ''
                 bulk_size = 0
+
+            # Add to the item the metadata__updated_on field so ES can use it
+            item["metadata__updated_on"] =  datetime.fromtimestamp(item["updated_on"]).isoformat()
 
             item_json = '{"index" : {"_id" : "%s" } }\n' % item['uuid']
             item_json += json.dumps(item) + '\n'
