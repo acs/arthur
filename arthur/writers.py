@@ -28,6 +28,7 @@ import time
 import requests
 
 from .errors import BaseError
+from .utils import unixtime_to_datetime
 
 
 logger = logging.getLogger(__name__)
@@ -70,7 +71,7 @@ class ElasticItemsWriter:
 
         if was_created:
             self.create_mapping(idx_url, NOT_ANALIZE_STRINGS_MAPPING)
-            self.create_mapping(idx_url, DISABLE_DYNAMIC_MAPPING)
+            # self.create_mapping(idx_url, DISABLE_DYNAMIC_MAPPING)
 
     def write(self, items, max_items=100):
         url = self.idx_url + '/items/_bulk'
@@ -81,6 +82,10 @@ class ElasticItemsWriter:
         packages = []
 
         for item in items:
+            item.update({
+                "metadata__timestamp": unixtime_to_datetime(item['timestamp']).isoformat(),
+                "metadata__updated_on": unixtime_to_datetime(item['updated_on']).isoformat()
+            })
             if bulk_size >= max_items:
                 packages.append((bulk, bulk_size))
                 nitems += bulk_size
@@ -128,7 +133,7 @@ class ElasticItemsWriter:
 
         if r.status_code != 200:
             # The index does not exist
-            r = requests.post(idx_url)
+            r = requests.put(idx_url)
 
             if r.status_code != 200:
                 logger.info("Can't create index %s (%s)", idx_url, r.status_code)
